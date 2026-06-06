@@ -2,8 +2,8 @@
 
 A fresh, brandable redesign inspired by the reply.la product category (AI sales
 engagement: multichannel outreach, AI SDR, deliverability, lead database).
-Built as **self-contained HTML + Tailwind (CDN)** — no build step, no
-dependencies. Just open the files.
+Built as **self-contained HTML + a precompiled Tailwind `styles.css`** — no CDN,
+no runtime dependencies, works fully offline. Just open the files.
 
 ## Files
 
@@ -11,8 +11,25 @@ dependencies. Just open the files.
 |------|------------|
 | `index.html` | Marketing landing page (hero, features, how-it-works, showcase, testimonials, pricing, FAQ, CTA, footer) |
 | `app.html` | In-app dashboard shell (sidebar, topbar, KPI cards, engagement chart, recent replies, campaigns table) |
+| `styles.css` | Precompiled Tailwind — already built, no CDN needed |
+| `tailwind.config.js`, `input.css` | Build source, only needed if you add new classes |
+| `screenshots/` | Rendered previews (light/dark, desktop/mobile) |
 
-Open `index.html` in any browser. "View live dashboard" / "Sign in" link to `app.html`.
+## How to view
+
+Pick whichever is easiest:
+
+1. **Double-click `index.html`** — opens directly in your browser (no server needed).
+   "View live dashboard" / "Sign in" link through to `app.html`.
+2. **Local server** (nicer for clean URLs):
+   ```bash
+   cd reply-whitelabel
+   python3 -m http.server 8000     # then open http://localhost:8000
+   ```
+3. **Preview the screenshots** in `screenshots/` without opening anything.
+
+> Only Google Fonts loads from the network (for Plus Jakarta Sans); everything
+> else is local. With no internet it falls back to a system sans-serif.
 
 ## How to rebrand (the whole point)
 
@@ -39,6 +56,15 @@ of each file's `<style>`. To make it your own, edit those values in **both**
 ### Dark mode
 Already built in. A `.dark` class on `<html>` swaps the token values. The toggle
 in the header persists the choice to `localStorage` and respects the OS setting.
+
+### Rebuilding `styles.css`
+Only needed if you add Tailwind classes that aren't already used. Requires Node:
+```bash
+npm i -D tailwindcss@3
+npx tailwindcss -c tailwind.config.js -i input.css -o styles.css --minify
+```
+Token (color/font) changes do **not** require a rebuild — they're CSS variables
+applied at runtime.
 
 ## Design system (auto-generated)
 
