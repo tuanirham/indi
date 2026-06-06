@@ -33,7 +33,9 @@ for dir in "$SRC"/*/; do
   [ -f "${dir}SKILL.md" ] || continue
   name="$(basename "$dir")"
   rm -rf "${SKILLS_DIR:?}/${name}"
-  cp -r "$dir" "${SKILLS_DIR}/${name}"
+  # -L dereferences symlinks (scripts/data point at the repo's src/ tree)
+  # so each installed skill is self-contained.
+  cp -rL "$dir" "${SKILLS_DIR}/${name}"
   installed=$((installed + 1))
 done
 
