@@ -11,6 +11,7 @@ no runtime dependencies, works fully offline. Just open the files.
 |------|------------|
 | `index.html` | Marketing landing page (hero, features, how-it-works, showcase, testimonials, pricing, FAQ, CTA, footer) |
 | `app.html` | In-app dashboard shell (sidebar, topbar, KPI cards, engagement chart, recent replies, campaigns table) |
+| `leaderboard.html` | **Apex Trading League** — a unique, interactive real-time ranking leaderboard for a trading contest: animated podium for the top 3, live rank changes with FLIP reordering + flash highlights, sortable standings (PnL / ROI / Win%), timeframe tabs, search, per-trader detail drawer with equity curve, countdown timer, and confetti when a new #1 takes the lead. Fully self-contained, zero build step. |
 | `styles.css` | Precompiled Tailwind — already built, no CDN needed |
 | `tailwind.config.js`, `input.css` | Build source, only needed if you add new classes |
 | `screenshots/` | Rendered previews (light/dark, desktop/mobile) |

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Trading League — Live Leaderboard</title>
+  <meta name="description" content="Real-time ranking leaderboard for the Apex Trading League contest. Live PnL, ROI, win-rate and rank changes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ============ Design tokens (Modern Dark — gold + purple) ============ */
+    :root{
+      --gold: 245 158 11;        /* #F59E0B primary */
+      --gold-2: 251 191 36;      /* #FBBF24 */
+      --violet: 139 92 246;      /* #8B5CF6 accent */
+      --violet-2: 167 139 250;
+      --bg: 9 12 24;             /* deep navy, not pure black */
+      --bg-2: 15 21 38;
+      --surface: 255 255 255;    /* used with low alpha for glass */
+      --fg: 248 250 252;
+      --muted: 148 163 184;
+      --border: 255 255 255;
+      --up: 34 197 94;           /* green */
+      --down: 244 63 94;         /* rose */
+      --radius: 18px;
+      --font: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; }
+    body{
+      font-family:var(--font);
+      color:rgb(var(--fg));
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgb(var(--violet)/.18), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgb(var(--gold)/.12), transparent 55%),
+        rgb(var(--bg));
+      min-height:100dvh;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{ color:inherit; }
+    h1,h2,h3,h4{ margin:0; letter-spacing:-.02em; }
+    button{ font-family:inherit; cursor:pointer; }
+    .tnum{ font-variant-numeric:tabular-nums; }
+    .mono{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+    .sr-only{ position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+
+    /* ============ Ambient animated blobs ============ */
+    .blobs{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+    .blob{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; }
+    .blob.a{ width:480px;height:480px; background:rgb(var(--gold)/.35); top:-120px; left:-80px; animation:float1 18s ease-in-out infinite; }
+    .blob.b{ width:520px;height:520px; background:rgb(var(--violet)/.40); top:10%; right:-140px; animation:float2 22s ease-in-out infinite; }
+    .blob.c{ width:420px;height:420px; background:rgb(56 189 248/.20); bottom:-160px; left:30%; animation:float1 26s ease-in-out infinite; }
+    @keyframes float1{ 0%,100%{ transform:translate(0,0) scale(1) } 50%{ transform:translate(60px,40px) scale(1.08) } }
+    @keyframes float2{ 0%,100%{ transform:translate(0,0) scale(1) } 50%{ transform:translate(-50px,30px) scale(1.05) } }
+
+    .wrap{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:22px clamp(16px,4vw,32px) 80px; }
+
+    /* ============ Glass primitives ============ */
+    .glass{
+      background:linear-gradient(180deg, rgb(var(--surface)/.07), rgb(var(--surface)/.03));
+      border:1px solid rgb(var(--border)/.10);
+      backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+      border-radius:var(--radius);
+    }
+
+    /* ============ Header ============ */
+    header.top{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:26px; }
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .logo{ width:44px;height:44px; border-radius:13px; display:grid; place-items:center;
+      background:linear-gradient(135deg, rgb(var(--gold)), rgb(var(--gold-2)));
+      box-shadow:0 10px 30px -8px rgb(var(--gold)/.6); color:#0b1020; }
+    .brand h1{ font-size:18px; font-weight:800; line-height:1.1; }
+    .brand .sub{ font-size:12px; color:rgb(var(--muted)); font-weight:500; }
+    .spacer{ flex:1; }
+    .live-toggle{ display:flex; align-items:center; gap:9px; padding:9px 14px; border-radius:999px;
+      border:1px solid rgb(var(--border)/.12); background:rgb(var(--surface)/.05); color:rgb(var(--fg));
+      font-size:13px; font-weight:600; transition:all .2s ease; }
+    .live-toggle:hover{ border-color:rgb(var(--gold)/.5); }
+    .live-toggle .dot{ width:9px;height:9px;border-radius:50%; background:rgb(var(--muted)); transition:.2s; }
+    .live-toggle.on .dot{ background:rgb(var(--up)); box-shadow:0 0 0 0 rgb(var(--up)/.6); animation:pulse 1.6s infinite; }
+    @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgb(var(--up)/.55) } 70%{ box-shadow:0 0 0 9px rgb(var(--up)/0) } 100%{ box-shadow:0 0 0 0 rgb(var(--up)/0) } }
+
+    /* ============ Stat strip ============ */
+    .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px; }
+    .stat{ padding:16px 18px; }
+    .stat .label{ font-size:12px; color:rgb(var(--muted)); font-weight:600; display:flex; align-items:center; gap:7px; }
+    .stat .val{ font-size:clamp(20px,3vw,28px); font-weight:800; margin-top:8px; }
+    .stat .val.gold{ background:linear-gradient(90deg,rgb(var(--gold-2)),rgb(var(--gold))); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .stat svg{ width:16px;height:16px; }
+    .countdown{ display:flex; gap:6px; margin-top:6px; }
+    .countdown .seg{ background:rgb(var(--surface)/.06); border:1px solid rgb(var(--border)/.10); border-radius:10px; padding:6px 8px; min-width:46px; text-align:center; }
+    .countdown .seg b{ font-size:20px; font-weight:800; display:block; line-height:1; }
+    .countdown .seg span{ font-size:9px; color:rgb(var(--muted)); text-transform:uppercase; letter-spacing:.08em; }
+
+    /* ============ Podium ============ */
+    .podium-section{ margin-bottom:30px; }
+    .section-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+    .section-head h2{ font-size:16px; font-weight:700; display:flex; align-items:center; gap:9px; }
+    .section-head h2 .bar{ width:4px;height:18px;border-radius:3px; background:linear-gradient(rgb(var(--gold)),rgb(var(--violet))); }
+    .podium{ display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:16px; align-items:end; }
+    .pcard{ position:relative; padding:22px 16px 18px; text-align:center; overflow:hidden; transition:transform .25s cubic-bezier(.16,1,.3,1); }
+    .pcard:hover{ transform:translateY(-6px); }
+    .pcard.r1{ order:2; padding-top:34px; border-color:rgb(var(--gold)/.4); box-shadow:0 24px 60px -24px rgb(var(--gold)/.55); }
+    .pcard.r2{ order:1; }
+    .pcard.r3{ order:3; }
+    .pcard .glow{ position:absolute; inset:0; opacity:.5; pointer-events:none; }
+    .pcard.r1 .glow{ background:radial-gradient(120px 80px at 50% 0%, rgb(var(--gold)/.35), transparent 70%); }
+    .pcard.r2 .glow{ background:radial-gradient(120px 80px at 50% 0%, rgb(203 213 225/.18), transparent 70%); }
+    .pcard.r3 .glow{ background:radial-gradient(120px 80px at 50% 0%, rgb(217 119 6/.20), transparent 70%); }
+    .medal{ position:relative; width:40px;height:40px; margin:0 auto 10px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:15px; color:#0b1020; }
+    .r1 .medal{ background:linear-gradient(135deg,#fde68a,#f59e0b); box-shadow:0 8px 22px -6px rgb(var(--gold)/.7); }
+    .r2 .medal{ background:linear-gradient(135deg,#f1f5f9,#94a3b8); }
+    .r3 .medal{ background:linear-gradient(135deg,#fcd9a3,#d97706); }
+    .crown{ position:absolute; top:-30px; left:50%; transform:translateX(-50%); width:30px;height:30px; color:rgb(var(--gold-2)); animation:bob 3s ease-in-out infinite; }
+    @keyframes bob{ 0%,100%{ transform:translateX(-50%) translateY(0) } 50%{ transform:translateX(-50%) translateY(-5px) } }
+    .pavatar{ width:64px;height:64px; border-radius:50%; margin:0 auto 12px; display:grid; place-items:center; font-weight:700; font-size:22px; color:#0b1020; border:2px solid rgb(var(--border)/.18); }
+    .pcard .pname{ font-size:16px; font-weight:700; }
+    .pcard .phandle{ font-size:12px; color:rgb(var(--muted)); margin-top:2px; }
+    .pcard .ppnl{ font-size:22px; font-weight:800; margin-top:12px; color:rgb(var(--up)); }
+    .pcard .proi{ font-size:12px; color:rgb(var(--muted)); margin-top:3px; }
+    .pcard .prize{ margin-top:12px; font-size:12px; font-weight:700; color:rgb(var(--gold-2)); padding:6px 10px; border-radius:999px; background:rgb(var(--gold)/.10); display:inline-block; }
+
+    /* ============ Controls ============ */
+    .controls{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+    .search{ position:relative; flex:1; min-width:200px; }
+    .search svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); width:17px;height:17px; color:rgb(var(--muted)); }
+    .search input{ width:100%; padding:11px 14px 11px 38px; border-radius:12px; border:1px solid rgb(var(--border)/.12);
+      background:rgb(var(--surface)/.05); color:rgb(var(--fg)); font-size:14px; outline:none; transition:.2s; }
+    .search input::placeholder{ color:rgb(var(--muted)); }
+    .search input:focus{ border-color:rgb(var(--gold)/.6); box-shadow:0 0 0 4px rgb(var(--gold)/.12); }
+    .segmented{ display:flex; padding:4px; border-radius:12px; border:1px solid rgb(var(--border)/.12); background:rgb(var(--surface)/.04); gap:2px; }
+    .segmented button{ border:0; background:transparent; color:rgb(var(--muted)); font-size:13px; font-weight:600; padding:7px 13px; border-radius:9px; transition:.18s; }
+    .segmented button[aria-pressed="true"]{ background:rgb(var(--gold)/.16); color:rgb(var(--gold-2)); }
+    .segmented button:hover{ color:rgb(var(--fg)); }
+
+    /* ============ Leaderboard list ============ */
+    .board{ padding:6px; }
+    .board-head, .row{ display:grid; grid-template-columns:56px 1fr 130px 110px 96px 120px; align-items:center; gap:10px; }
+    .board-head{ padding:10px 16px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:rgb(var(--muted)); font-weight:600; }
+    .board-head button{ background:none; border:0; color:inherit; font:inherit; text-transform:inherit; letter-spacing:inherit; display:inline-flex; align-items:center; gap:4px; padding:0; }
+    .board-head button:hover{ color:rgb(var(--fg)); }
+    .board-head .sort-ind{ opacity:0; }
+    .board-head button[data-active="true"]{ color:rgb(var(--gold-2)); }
+    .board-head button[data-active="true"] .sort-ind{ opacity:1; }
+    .col-r{ text-align:right; justify-self:end; }
+    .row{ padding:12px 16px; border-radius:14px; transition:background .18s ease; position:relative; cursor:pointer; }
+    .row:hover{ background:rgb(var(--surface)/.05); }
+    .row:focus-visible{ outline:2px solid rgb(var(--gold)/.7); outline-offset:-2px; }
+    .row + .row{ margin-top:2px; }
+    .row.flash-up{ animation:flashUp 1s ease; }
+    .row.flash-down{ animation:flashDown 1s ease; }
+    @keyframes flashUp{ 0%{ background:rgb(var(--up)/.22) } 100%{ background:transparent } }
+    @keyframes flashDown{ 0%{ background:rgb(var(--down)/.20) } 100%{ background:transparent } }
+    .rankcell{ display:flex; align-items:center; gap:8px; }
+    .rk{ font-size:16px; font-weight:800; width:26px; text-align:center; }
+    .rk.top{ color:rgb(var(--gold-2)); }
+    .delta{ display:inline-flex; align-items:center; gap:2px; font-size:11px; font-weight:700; padding:2px 5px; border-radius:6px; min-width:34px; justify-content:center; }
+    .delta.up{ color:rgb(var(--up)); background:rgb(var(--up)/.12); }
+    .delta.down{ color:rgb(var(--down)); background:rgb(var(--down)/.12); }
+    .delta.same{ color:rgb(var(--muted)); background:rgb(var(--surface)/.06); }
+    .delta svg{ width:10px;height:10px; }
+    .trader{ display:flex; align-items:center; gap:12px; min-width:0; }
+    .avatar{ width:38px;height:38px; border-radius:11px; flex:none; display:grid; place-items:center; font-weight:700; font-size:14px; color:#0b1020; }
+    .tinfo{ min-width:0; }
+    .tinfo .nm{ font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:6px; }
+    .tinfo .hd{ font-size:12px; color:rgb(var(--muted)); }
+    .badge{ font-size:9px; font-weight:700; padding:2px 6px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+    .badge.pro{ background:rgb(var(--violet)/.18); color:rgb(var(--violet-2)); }
+    .badge.streak{ background:rgb(var(--gold)/.16); color:rgb(var(--gold-2)); }
+    .pnl{ font-weight:700; font-size:14px; }
+    .pnl.pos{ color:rgb(var(--up)); }
+    .pnl.neg{ color:rgb(var(--down)); }
+    .roi{ font-weight:600; font-size:14px; }
+    .win{ font-size:13px; color:rgb(var(--muted)); }
+    .spark{ width:110px; height:34px; }
+    .spark path.line{ fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .empty{ text-align:center; padding:48px 16px; color:rgb(var(--muted)); }
+
+    /* ============ Detail drawer ============ */
+    .scrim{ position:fixed; inset:0; background:rgb(0 0 0/.55); backdrop-filter:blur(3px); z-index:40; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+    .scrim.open{ opacity:1; pointer-events:auto; }
+    .drawer{ position:fixed; top:0; right:0; height:100dvh; width:min(420px,92vw); z-index:50;
+      background:linear-gradient(180deg, rgb(var(--bg-2)), rgb(var(--bg)));
+      border-left:1px solid rgb(var(--border)/.12); box-shadow:-30px 0 80px -30px rgb(0 0 0/.8);
+      transform:translateX(100%); transition:transform .32s cubic-bezier(.16,1,.3,1); overflow-y:auto; }
+    .drawer.open{ transform:translateX(0); }
+    .drawer-inner{ padding:24px; }
+    .drawer .closebtn{ position:absolute; top:18px; right:18px; width:36px;height:36px; border-radius:10px; border:1px solid rgb(var(--border)/.12); background:rgb(var(--surface)/.05); color:rgb(var(--fg)); display:grid; place-items:center; }
+    .drawer .closebtn:hover{ border-color:rgb(var(--gold)/.5); }
+    .dhead{ display:flex; align-items:center; gap:14px; margin:6px 0 20px; }
+    .dhead .avatar{ width:60px;height:60px; border-radius:16px; font-size:22px; }
+    .dhead .nm{ font-size:20px; font-weight:800; }
+    .dhead .hd{ font-size:13px; color:rgb(var(--muted)); }
+    .dstats{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .dstat{ padding:14px; border-radius:14px; background:rgb(var(--surface)/.05); border:1px solid rgb(var(--border)/.08); }
+    .dstat .l{ font-size:11px; color:rgb(var(--muted)); font-weight:600; }
+    .dstat .v{ font-size:19px; font-weight:800; margin-top:5px; }
+    .chartbox{ padding:16px; border-radius:14px; background:rgb(var(--surface)/.04); border:1px solid rgb(var(--border)/.08); margin-bottom:18px; }
+    .chartbox h4{ font-size:12px; color:rgb(var(--muted)); font-weight:600; margin-bottom:10px; }
+    .badges-row{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* ============ Confetti ============ */
+    .confetti{ position:fixed; inset:0; z-index:60; pointer-events:none; overflow:hidden; }
+    .confetti i{ position:absolute; top:-12px; width:9px;height:14px; border-radius:2px; animation:fall linear forwards; }
+    @keyframes fall{ to{ transform:translateY(105vh) rotate(720deg); opacity:.9; } }
+
+    footer{ text-align:center; color:rgb(var(--muted)); font-size:12px; margin-top:40px; }
+
+    /* ============ Responsive ============ */
+    @media (max-width:880px){
+      .stats{ grid-template-columns:1fr 1fr; }
+      .board-head, .row{ grid-template-columns:46px 1fr 96px 84px; }
+      .col-win, .col-spark{ display:none; }
+    }
+    @media (max-width:600px){
+      .podium{ grid-template-columns:1fr; }
+      .pcard.r1,.pcard.r2,.pcard.r3{ order:0; padding-top:22px; }
+      .board-head, .row{ grid-template-columns:42px 1fr 92px; }
+      .col-roi{ display:none; }
+    }
+    @media (prefers-reduced-motion:reduce){
+      *{ animation-duration:.001ms!important; transition-duration:.001ms!important; }
+      .blob{ animation:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blobs" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+
+  <main class="wrap">
+    <!-- Header -->
+    <header class="top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+        </div>
+        <div>
+          <h1>Apex Trading League</h1>
+          <div class="sub">Season 7 · Live Leaderboard</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="live-toggle on" id="liveBtn" aria-pressed="true">
+        <span class="dot" aria-hidden="true"></span><span id="liveLabel">Live</span>
+      </button>
+    </header>
+
+    <!-- Stat strip -->
+    <section class="stats" aria-label="Contest summary">
+      <div class="stat glass">
+        <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h4.5a1.5 1.5 0 010 3H9"/></svg> Prize Pool</div>
+        <div class="val gold tnum">$250,000</div>
+      </div>
+      <div class="stat glass">
+        <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/></svg> Traders</div>
+        <div class="val tnum" id="statTraders">1,284</div>
+      </div>
+      <div class="stat glass">
+        <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Total Volume</div>
+        <div class="val tnum" id="statVol">$48.2M</div>
+      </div>
+      <div class="stat glass">
+        <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg> Ends In</div>
+        <div class="countdown" id="countdown" aria-live="off"></div>
+      </div>
+    </section>
+
+    <!-- Podium -->
+    <section class="podium-section">
+      <div class="section-head"><h2><span class="bar"></span> Top Performers</h2></div>
+      <div class="podium" id="podium"></div>
+    </section>
+
+    <!-- Controls -->
+    <section>
+      <div class="section-head"><h2><span class="bar"></span> Full Standings</h2></div>
+      <div class="controls">
+        <label class="search">
+          <span class="sr-only">Search traders</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input id="search" type="search" placeholder="Search trader or handle…" autocomplete="off" />
+        </label>
+        <div class="segmented" role="group" aria-label="Timeframe">
+          <button data-tf="daily" aria-pressed="false">Daily</button>
+          <button data-tf="weekly" aria-pressed="false">Weekly</button>
+          <button data-tf="all" aria-pressed="true">All-Time</button>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="board glass">
+        <div class="board-head" role="row">
+          <div>Rank</div>
+          <div>Trader</div>
+          <div class="col-r"><button data-sort="pnl" data-active="true">PnL <span class="sort-ind">▼</span></button></div>
+          <div class="col-r col-roi"><button data-sort="roi">ROI <span class="sort-ind">▼</span></button></div>
+          <div class="col-r col-win"><button data-sort="win">Win% <span class="sort-ind">▼</span></button></div>
+          <div class="col-r col-spark">7d Trend</div>
+        </div>
+        <div id="rows"></div>
+        <div class="empty" id="empty" hidden>No traders match your search.</div>
+      </div>
+    </section>
+
+    <footer>Simulated demo data · Apex Trading League · Click any trader for details · Toggle <strong>Live</strong> to watch ranks shift in real time.</footer>
+  </main>
+
+  <!-- Drawer -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerName" aria-hidden="true">
+    <button class="closebtn" id="closeDrawer" aria-label="Close details">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="drawer-inner" id="drawerBody"></div>
+  </aside>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <script>
+  (function(){
+    "use strict";
+    const PALETTES = [
+      ['#fbbf24','#f59e0b'],['#a78bfa','#8b5cf6'],['#38bdf8','#0ea5e9'],['#34d399','#10b981'],
+      ['#f472b6','#ec4899'],['#fb7185','#f43f5e'],['#facc15','#eab308'],['#22d3ee','#06b6d4'],
+      ['#c084fc','#a855f7'],['#4ade80','#22c55e'],['#fdba74','#f97316'],['#818cf8','#6366f1']
+    ];
+    const NAMES = [
+      ['Aria Voss','@quantaria'],['Marcus Chen','@deltamarc'],['Lena Park','@lenaalpha'],
+      ['Diego Ruiz','@rdiego_fx'],['Yuki Tanaka','@yuki_scalp'],['Omar Haddad','@omarmacro'],
+      ['Sofia Lindqvist','@sofialong'],['Kai Nakamura','@kaiwave'],['Priya Nair','@priyaedge'],
+      ['Tom Becker','@beckerbull'],['Nadia Roux','@nadiaquant'],['Liu Wei','@weibreaks'],
+      ['Elena Costa','@elenavol'],['Sam Okafor','@samsignal'],['Hana Kim','@hanahodl'],
+      ['Victor Petrov','@vpmomentum'],['Grace Lee','@gracetrend'],['Raj Patel','@rajswing'],
+      ['Mila Novak','@milashort'],['Ben Carter','@bencarry'],['Zara Ali','@zarabreak'],
+      ['Felix Wong','@felixgrid'],['Ines Garcia','@inesmacro'],['Noah Klein','@noahquant']
+    ];
+    const rng = (seed => () => (seed = (seed*1103515245+12345)&0x7fffffff)/0x7fffffff)(42);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- Build trader data ----
+    function makeSeries(start, n){
+      const out=[start]; for(let i=1;i<n;i++){ out.push(Math.max(5, out[i-1] + (rng()-0.45)*start*0.12)); } return out;
+    }
+    let traders = NAMES.map((nm,i)=>{
+      const base = 300000*(1-i/30) + rng()*40000;
+      const roi = (base/ (50000+rng()*30000))*0.9 + rng()*8;
+      const series = makeSeries(50+rng()*60, 28);
+      return {
+        id:i, name:nm[0], handle:nm[1], pal:PALETTES[i%PALETTES.length],
+        pnl: Math.round(base/100)*100,
+        roi: +(roi).toFixed(1),
+        win: Math.round(48 + rng()*44),
+        trades: Math.round(120+rng()*900),
+        volume: Math.round((2+rng()*40)*10)/10,
+        streak: i%5===0 ? Math.round(3+rng()*9) : 0,
+        pro: rng()>0.6,
+        series,
+        prevRank: i+1
+      };
+    });
+
+    let sortKey='pnl', tfFactor={daily:0.12, weekly:0.4, all:1}, currentTf='all';
+    let query='', live=true, liveTimer=null, selected=null;
+
+    const $rows = document.getElementById('rows');
+    const $podium = document.getElementById('podium');
+    const $empty = document.getElementById('empty');
+
+    function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+    function money(n){
+      const a=Math.abs(n);
+      if(a>=1e6) return (n<0?'-':'+')+'$'+(a/1e6).toFixed(2)+'M';
+      if(a>=1e3) return (n<0?'-':'+')+'$'+(a/1e3).toFixed(1)+'K';
+      return (n<0?'-':'+')+'$'+a;
+    }
+    function tfVal(t,key){
+      const f = tfFactor[currentTf];
+      if(key==='pnl') return Math.round(t.pnl*f);
+      if(key==='roi') return +(t.roi*Math.sqrt(f)).toFixed(1);
+      return t.win;
+    }
+    function sparkPath(series,w,h){
+      const min=Math.min(...series), max=Math.max(...series), range=(max-min)||1;
+      return series.map((v,i)=>{
+        const x=(i/(series.length-1))*w;
+        const y=h-((v-min)/range)*(h-4)-2;
+        return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);
+      }).join(' ');
+    }
+
+    function computeRanked(){
+      const list = traders.slice().sort((a,b)=> tfVal(b,sortKey)-tfVal(a,sortKey));
+      list.forEach((t,i)=> t._rank=i+1);
+      return list;
+    }
+
+    // ---- Render podium ----
+    function renderPodium(ranked){
+      const top3 = ranked.slice(0,3);
+      const order=[1,0,2]; // r2,r1,r3 visual handled by CSS order
+      $podium.innerHTML = top3.map((t,i)=>{
+        const cls = i===0?'r1':(i===1?'r2':'r3');
+        const crown = i===0 ? `<svg class="crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5L3 7z"/></svg>` : '';
+        return `<button class="pcard glass ${cls}" data-id="${t.id}">
+          <span class="glow"></span>${crown}
+          <div class="medal">${t._rank}</div>
+          <div class="pavatar" style="background:linear-gradient(135deg,${t.pal[0]},${t.pal[1]})">${initials(t.name)}</div>
+          <div class="pname">${t.name}</div>
+          <div class="phandle">${t.handle}</div>
+          <div class="ppnl tnum">${money(tfVal(t,'pnl'))}</div>
+          <div class="proi tnum">ROI ${tfVal(t,'roi')}% · ${t.win}% win</div>
+          <div class="prize">${['$100,000','$50,000','$25,000'][i]}</div>
+        </button>`;
+      }).join('');
+    }
+
+    // ---- Render rows with FLIP animation ----
+    let lastPositions = {};
+    function renderRows(){
+      const ranked = computeRanked();
+      renderPodium(ranked);
+
+      const filtered = ranked.filter(t=> !query || (t.name+t.handle).toLowerCase().includes(query));
+      $empty.hidden = filtered.length>0;
+
+      // capture old positions
+      const prev = {};
+      [...$rows.children].forEach(el=> prev[el.dataset.id]=el.getBoundingClientRect().top);
+
+      $rows.innerHTML = filtered.map(t=>{
+        const pnl=tfVal(t,'pnl'), roi=tfVal(t,'roi');
+        const diff = t.prevRank - t._rank;
+        let delta;
+        if(diff>0) delta=`<span class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>${diff}</span>`;
+        else if(diff<0) delta=`<span class="delta down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12l7 7 7-7"/></svg>${-diff}</span>`;
+        else delta=`<span class="delta same">—</span>`;
+        return `<div class="row" data-id="${t.id}" tabindex="0" role="button" aria-label="${t.name}, rank ${t._rank}, PnL ${money(pnl)}">
+          <div class="rankcell">
+            <span class="rk ${t._rank<=3?'top':''} tnum">${t._rank}</span>
+            ${delta}
+          </div>
+          <div class="trader">
+            <div class="avatar" style="background:linear-gradient(135deg,${t.pal[0]},${t.pal[1]})">${initials(t.name)}</div>
+            <div class="tinfo">
+              <div class="nm">${t.name} ${t.pro?'<span class="badge pro">Pro</span>':''}${t.streak?`<span class="badge streak">${t.streak}w streak</span>`:''}</div>
+              <div class="hd">${t.handle}</div>
+            </div>
+          </div>
+          <div class="col-r pnl ${pnl>=0?'pos':'neg'} tnum">${money(pnl)}</div>
+          <div class="col-r col-roi roi tnum" style="color:${roi>=0?'rgb(34 197 94)':'rgb(244 63 94)'}">${roi>=0?'+':''}${roi}%</div>
+          <div class="col-r col-win win tnum">${t.win}%</div>
+          <div class="col-spark">
+            <svg class="spark" viewBox="0 0 110 34" preserveAspectRatio="none" aria-hidden="true">
+              <defs><linearGradient id="g${t.id}" x1="0" x2="1"><stop offset="0" stop-color="${t.pal[0]}"/><stop offset="1" stop-color="${t.pal[1]}"/></linearGradient></defs>
+              <path class="line" stroke="url(#g${t.id})" d="${sparkPath(t.series,110,34)}"/>
+            </svg>
+          </div>
+        </div>`;
+      }).join('');
+
+      // FLIP: animate from old to new positions
+      if(!reduceMotion){
+        [...$rows.children].forEach(el=>{
+          const id=el.dataset.id;
+          if(prev[id]!==undefined){
+            const dy = prev[id]-el.getBoundingClientRect().top;
+            if(Math.abs(dy)>1){
+              el.style.transform=`translateY(${dy}px)`;
+              el.style.transition='none';
+              requestAnimationFrame(()=>{
+                el.style.transition='transform .55s cubic-bezier(.16,1,.3,1)';
+                el.style.transform='';
+              });
+            }
+          }
+        });
+      }
+    }
+
+    // ---- Live simulation ----
+    function tick(){
+      const ranked = computeRanked();
+      ranked.forEach(t=> t.prevRank=t._rank);
+      const before = ranked[0].id;
+      // perturb a few random traders
+      const k = 3+Math.floor(rng()*4);
+      for(let i=0;i<k;i++){
+        const t = traders[Math.floor(rng()*traders.length)];
+        const delta = (rng()-0.42)*t.pnl*0.06;
+        t.pnl = Math.round((t.pnl+delta)/100)*100;
+        t.roi = +(t.roi + (rng()-0.45)*1.5).toFixed(1);
+        t.win = Math.min(99,Math.max(20, t.win + Math.round((rng()-0.5)*2)));
+        t.series = t.series.slice(1).concat(Math.max(5, t.series[t.series.length-1]+(rng()-0.4)*30));
+      }
+      renderRows();
+      const after = computeRanked()[0].id;
+      // flash changed rows
+      flashChanges();
+      if(after!==before) burstConfetti();
+    }
+    function flashChanges(){
+      [...$rows.children].forEach(el=>{
+        const id=+el.dataset.id; const t=traders.find(x=>x.id===id);
+        if(!t) return;
+        const d=t.prevRank-t._rank;
+        if(d>0) el.classList.add('flash-up');
+        else if(d<0) el.classList.add('flash-down');
+        if(d!==0) setTimeout(()=>el.classList.remove('flash-up','flash-down'),1000);
+      });
+    }
+    function startLive(){ if(liveTimer) return; liveTimer=setInterval(tick, 2600); }
+    function stopLive(){ clearInterval(liveTimer); liveTimer=null; }
+
+    // ---- Confetti ----
+    function burstConfetti(){
+      if(reduceMotion) return;
+      const c=document.getElementById('confetti');
+      const cols=['#f59e0b','#fbbf24','#8b5cf6','#a78bfa','#34d399'];
+      for(let i=0;i<60;i++){
+        const p=document.createElement('i');
+        p.style.left=Math.random()*100+'vw';
+        p.style.background=cols[i%cols.length];
+        p.style.animationDuration=(2+Math.random()*2)+'s';
+        p.style.animationDelay=(Math.random()*0.4)+'s';
+        c.appendChild(p);
+        setTimeout(()=>p.remove(),4500);
+      }
+    }
+
+    // ---- Drawer ----
+    const $scrim=document.getElementById('scrim'), $drawer=document.getElementById('drawer'), $dbody=document.getElementById('drawerBody');
+    function openDrawer(id){
+      const t=traders.find(x=>x.id===id); if(!t) return;
+      selected=id;
+      const ranked=computeRanked(); const rank=ranked.find(x=>x.id===id)._rank;
+      $dbody.innerHTML=`
+        <div class="dhead">
+          <div class="avatar" style="background:linear-gradient(135deg,${t.pal[0]},${t.pal[1]})">${initials(t.name)}</div>
+          <div><div class="nm" id="drawerName">${t.name}</div><div class="hd">${t.handle} · Rank #${rank}</div></div>
+        </div>
+        <div class="badges-row" style="margin-bottom:18px">
+          ${t.pro?'<span class="badge pro">Pro Trader</span>':''}
+          ${t.streak?`<span class="badge streak">${t.streak}-week win streak</span>`:''}
+          <span class="badge" style="background:rgb(56 189 248/.16);color:#7dd3fc">Verified</span>
+        </div>
+        <div class="dstats">
+          <div class="dstat"><div class="l">Total PnL</div><div class="v tnum" style="color:rgb(34 197 94)">${money(t.pnl)}</div></div>
+          <div class="dstat"><div class="l">ROI</div><div class="v tnum" style="color:rgb(34 197 94)">+${t.roi}%</div></div>
+          <div class="dstat"><div class="l">Win Rate</div><div class="v tnum">${t.win}%</div></div>
+          <div class="dstat"><div class="l">Trades</div><div class="v tnum">${t.trades.toLocaleString()}</div></div>
+          <div class="dstat"><div class="l">Volume</div><div class="v tnum">$${t.volume}M</div></div>
+          <div class="dstat"><div class="l">Best Day</div><div class="v tnum" style="color:rgb(34 197 94)">+$${(Math.round(t.pnl*0.18/100)*100).toLocaleString()}</div></div>
+        </div>
+        <div class="chartbox">
+          <h4>Equity curve · last 28 sessions</h4>
+          <svg viewBox="0 0 360 120" preserveAspectRatio="none" style="width:100%;height:120px">
+            <defs>
+              <linearGradient id="dg" x1="0" x2="1"><stop offset="0" stop-color="${t.pal[0]}"/><stop offset="1" stop-color="${t.pal[1]}"/></linearGradient>
+              <linearGradient id="df" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${t.pal[1]}" stop-opacity=".35"/><stop offset="1" stop-color="${t.pal[1]}" stop-opacity="0"/></linearGradient>
+            </defs>
+            <path d="${sparkPath(t.series,360,120)} L360 120 L0 120 Z" fill="url(#df)"/>
+            <path class="line" style="fill:none;stroke-width:2.5" stroke="url(#dg)" d="${sparkPath(t.series,360,120)}"/>
+          </svg>
+        </div>`;
+      $scrim.classList.add('open'); $drawer.classList.add('open'); $drawer.setAttribute('aria-hidden','false');
+      document.getElementById('closeDrawer').focus();
+    }
+    function closeDrawer(){ selected=null; $scrim.classList.remove('open'); $drawer.classList.remove('open'); $drawer.setAttribute('aria-hidden','true'); }
+    $scrim.addEventListener('click',closeDrawer);
+    document.getElementById('closeDrawer').addEventListener('click',closeDrawer);
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+
+    // ---- Events ----
+    function rowClick(e){
+      const el=e.target.closest('[data-id]'); if(!el) return; openDrawer(+el.dataset.id);
+    }
+    $rows.addEventListener('click',rowClick);
+    $rows.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target.dataset.id){ e.preventDefault(); openDrawer(+e.target.dataset.id);} });
+    $podium.addEventListener('click',rowClick);
+
+    document.getElementById('search').addEventListener('input',e=>{ query=e.target.value.trim().toLowerCase(); renderRows(); });
+
+    document.querySelectorAll('.board-head [data-sort]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        sortKey=btn.dataset.sort;
+        document.querySelectorAll('.board-head [data-sort]').forEach(b=>b.removeAttribute('data-active'));
+        btn.setAttribute('data-active','true');
+        renderRows();
+      });
+    });
+    document.querySelectorAll('[data-tf]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        currentTf=btn.dataset.tf;
+        document.querySelectorAll('[data-tf]').forEach(b=>b.setAttribute('aria-pressed','false'));
+        btn.setAttribute('aria-pressed','true');
+        renderRows();
+      });
+    });
+    const $liveBtn=document.getElementById('liveBtn');
+    $liveBtn.addEventListener('click',()=>{
+      live=!live;
+      $liveBtn.classList.toggle('on',live);
+      $liveBtn.setAttribute('aria-pressed',String(live));
+      document.getElementById('liveLabel').textContent= live?'Live':'Paused';
+      if(live) startLive(); else stopLive();
+    });
+
+    // ---- Countdown ----
+    const end = Date.now()+ (3*86400000 + 7*3600000 + 42*60000);
+    function renderCountdown(){
+      let s=Math.max(0,Math.floor((end-Date.now())/1000));
+      const d=Math.floor(s/86400); s%=86400; const h=Math.floor(s/3600); s%=3600; const m=Math.floor(s/60); s%=60;
+      const seg=(v,l)=>`<div class="seg"><b class="tnum">${String(v).padStart(2,'0')}</b><span>${l}</span></div>`;
+      document.getElementById('countdown').innerHTML=seg(d,'days')+seg(h,'hrs')+seg(m,'min')+seg(s,'sec');
+    }
+    renderCountdown(); setInterval(renderCountdown,1000);
+
+    // ---- Boot ----
+    computeRanked().forEach(t=> t.prevRank=t._rank);
+    renderRows();
+    if(live) startLive();
+  })();
+  </script>
+</body>
+</html>
