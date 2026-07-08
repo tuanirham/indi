@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coffee Subscriptions — Ember &amp; Oak Roasting Co.</title>
+  <meta name="description" content="Fresh-roasted coffee on your schedule. Three plans from RM42/month with free delivery, flexible pausing, and subscriber-only lots.">
+  <link rel="preload" href="fonts/PlayfairDisplay-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='19' fill='%232B1C12'/%3E%3Cpath d='M20 7.5c4.8 4.2 7.2 8.4 7.2 12.6 0 4.6-3.2 8.4-7.2 8.4s-7.2-3.8-7.2-8.4c0-4.2 2.4-8.4 7.2-12.6z' fill='%23C67C4E'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="announce">Free delivery over RM120 &middot; Every bag ships within 48 hours of roasting</div>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Ember and Oak Roasting Co. — home">
+        <svg class="brand-mark" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="19" fill="#2B1C12"/>
+          <path d="M20 7.5c4.8 4.2 7.2 8.4 7.2 12.6 0 4.6-3.2 8.4-7.2 8.4s-7.2-3.8-7.2-8.4c0-4.2 2.4-8.4 7.2-12.6z" fill="#C67C4E"/>
+          <path d="M20 12c2.6 2.9 3.9 5.6 3.9 8.1 0 2.9-1.7 5.2-3.9 5.2s-3.9-2.3-3.9-5.2c0-2.5 1.3-5.2 3.9-8.1z" fill="#F3E9DA"/>
+        </svg>
+        <span><span class="brand-name">Ember &amp; Oak</span><span class="brand-sub">Roasting Co.</span></span>
+      </a>
+      <nav aria-label="Primary">
+        <ul class="nav-links" id="nav-links">
+          <li>
+            <button class="nav-close cart-btn" type="button" aria-label="Close menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="subscriptions.html" aria-current="page">Subscriptions</a></li>
+          <li><a href="about.html">Our Story</a></li>
+          <li><a href="visit.html">Visit</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <button class="cart-btn" type="button" aria-label="Shopping bag">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+          <span class="cart-count" style="display:none">0</span>
+        </button>
+        <a class="btn btn-primary btn-sm nav-cta" href="subscriptions.html">Subscribe</a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  <div class="nav-scrim" aria-hidden="true"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container" style="text-align:center;">
+        <p class="eyebrow" style="justify-content:center;">Cancel anytime &middot; Skip any dispatch</p>
+        <h1>Fresh coffee, on your schedule</h1>
+        <p class="lead" style="margin-inline:auto;">Pick a plan, tell us how you brew, and we'll handle the rest. Every dispatch is roasted to order and ships free, nationwide.</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="plans-title">
+      <div class="container">
+        <h2 id="plans-title" class="sr-only">Subscription plans</h2>
+        <div class="grid-3" style="align-items:stretch; padding-top: var(--space-4);">
+          <article class="card tier reveal">
+            <div>
+              <h3>The Explorer</h3>
+              <p style="color:var(--color-muted); font-size:0.95rem;">One bag a month, always something new.</p>
+            </div>
+            <p class="tier-price">RM42 <small>/ month</small></p>
+            <ul class="tier-features">
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>1 &times; 250g bag, rotating origin</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Whole bean or ground to your brewer</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Free delivery, every time</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Tasting card with every bag</span></li>
+            </ul>
+            <a class="btn btn-outline btn-block" href="contact.html">Start with Explorer</a>
+          </article>
+
+          <article class="card tier tier-featured reveal reveal-d1">
+            <span class="badge badge-amber tier-flag">Most popular</span>
+            <div>
+              <h3>The Enthusiast</h3>
+              <p style="color:var(--color-muted); font-size:0.95rem;">Two bags, twice-monthly dispatch. The sweet spot.</p>
+            </div>
+            <p class="tier-price">RM78 <small>/ month</small></p>
+            <ul class="tier-features">
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>2 &times; 250g bags per month</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Mix &amp; match: espresso + filter</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>15% off cafe drinks &amp; retail</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Early access to limited lots</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Free delivery, every time</span></li>
+            </ul>
+            <a class="btn btn-primary btn-block" href="contact.html">Start with Enthusiast</a>
+          </article>
+
+          <article class="card tier reveal reveal-d2">
+            <div>
+              <h3>The Connoisseur</h3>
+              <p style="color:var(--color-muted); font-size:0.95rem;">Rare lots and competition coffees, curated quarterly.</p>
+            </div>
+            <p class="tier-price">RM160 <small>/ month</small></p>
+            <ul class="tier-features">
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>3 &times; 200g rare &amp; auction lots</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Roaster's notes &amp; brew protocols</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Quarterly virtual cupping with our head roaster</span></li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Free delivery, every time</span></li>
+            </ul>
+            <a class="btn btn-outline btn-block" href="contact.html">Start with Connoisseur</a>
+          </article>
+        </div>
+        <p style="text-align:center; color:var(--color-muted); font-size:0.9rem; margin-top: var(--space-8);">All plans renew monthly. Skip, pause, or cancel from your account in two taps — no phone calls, no guilt trips.</p>
+      </div>
+    </section>
+
+    <section class="section" style="background: var(--color-surface-warm); border-block: 1px solid var(--color-border);" aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-head center reveal">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-title">From sign-up to first sip</h2>
+        </div>
+        <div class="grid-4">
+          <article class="card reveal">
+            <p class="step-num" aria-hidden="true">01</p>
+            <h3 style="font-size:1.15rem;">Tell us your taste</h3>
+            <p style="font-size:0.95rem;">A 60-second quiz: how you brew, what you love, what you hate. We listen.</p>
+          </article>
+          <article class="card reveal reveal-d1">
+            <p class="step-num" aria-hidden="true">02</p>
+            <h3 style="font-size:1.15rem;">We roast to order</h3>
+            <p style="font-size:0.95rem;">Your beans join the next batch on the drum — never pulled from a shelf.</p>
+          </article>
+          <article class="card reveal reveal-d2">
+            <p class="step-num" aria-hidden="true">03</p>
+            <h3 style="font-size:1.15rem;">Delivered fresh</h3>
+            <p style="font-size:0.95rem;">Dispatched within 48 hours of the roast, tracked to your door.</p>
+          </article>
+          <article class="card reveal reveal-d3">
+            <p class="step-num" aria-hidden="true">04</p>
+            <h3 style="font-size:1.15rem;">Rate &amp; refine</h3>
+            <p style="font-size:0.95rem;">Rate each bag and the rotation adapts. It gets better every month.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="faq-title">
+      <div class="container" style="max-width: 50rem;">
+        <div class="section-head center reveal">
+          <p class="eyebrow">Questions, answered</p>
+          <h2 id="faq-title">Subscription FAQ</h2>
+        </div>
+        <div class="accordion reveal">
+          <div class="accordion-item">
+            <h3 style="margin:0;">
+              <button class="accordion-trigger" type="button" aria-expanded="false" aria-controls="faq-1">
+                Can I pause or skip a delivery?
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </h3>
+            <div class="accordion-panel" id="faq-1" hidden>
+              <p>Yes — skip any dispatch or pause for up to three months from your account page. Changes made before Sunday midnight apply to that week's roast.</p>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h3 style="margin:0;">
+              <button class="accordion-trigger" type="button" aria-expanded="false" aria-controls="faq-2">
+                What if I don't like a coffee you send?
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </h3>
+            <div class="accordion-panel" id="faq-2" hidden>
+              <p>Rate it two stars or fewer and we'll replace it free with something closer to your taste — and the rotation learns from it. Roughly 3% of dispatches get replaced; we consider that tuition.</p>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h3 style="margin:0;">
+              <button class="accordion-trigger" type="button" aria-expanded="false" aria-controls="faq-3">
+                Do you grind the beans for me?
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </h3>
+            <div class="accordion-panel" id="faq-3" hidden>
+              <p>We can, calibrated to espresso, moka, V60, AeroPress, French press, or cold brew. That said — whole bean stays fresh far longer, and a hand grinder pays for itself in flavour within a month.</p>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h3 style="margin:0;">
+              <button class="accordion-trigger" type="button" aria-expanded="false" aria-controls="faq-4">
+                Where do you deliver, and how fast?
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </h3>
+            <div class="accordion-panel" id="faq-4" hidden>
+              <p>Everywhere in Malaysia. Klang Valley orders usually arrive next day; East Malaysia within 3–4 days. Every subscription dispatch ships free regardless of size.</p>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h3 style="margin:0;">
+              <button class="accordion-trigger" type="button" aria-expanded="false" aria-controls="faq-5">
+                Is there a commitment or cancellation fee?
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </h3>
+            <div class="accordion-panel" id="faq-5" hidden>
+              <p>None. Cancel in two taps, any time, effective immediately. If you cancel mid-cycle we still ship anything you've already paid for — fresh, of course.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight" aria-label="Gift subscriptions">
+      <div class="container">
+        <div class="band reveal">
+          <div class="grid-2" style="align-items:center;">
+            <div>
+              <p class="eyebrow">Give the good stuff</p>
+              <h2>Gift subscriptions, from 3 months</h2>
+              <p class="lead">A prepaid subscription with a handwritten card and zero renewal surprises. The rare gift that gets better with every delivery.</p>
+            </div>
+            <div style="justify-self:end;">
+              <a class="btn btn-light" href="contact.html">Arrange a gift</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a class="brand" href="index.html" aria-label="Ember and Oak Roasting Co. — home">
+            <svg class="brand-mark" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+              <circle cx="20" cy="20" r="19" fill="#C67C4E"/>
+              <path d="M20 7.5c4.8 4.2 7.2 8.4 7.2 12.6 0 4.6-3.2 8.4-7.2 8.4s-7.2-3.8-7.2-8.4c0-4.2 2.4-8.4 7.2-12.6z" fill="#1E130C"/>
+              <path d="M20 12c2.6 2.9 3.9 5.6 3.9 8.1 0 2.9-1.7 5.2-3.9 5.2s-3.9-2.3-3.9-5.2c0-2.5 1.3-5.2 3.9-8.1z" fill="#F3E9DA"/>
+            </svg>
+            <span><span class="brand-name">Ember &amp; Oak</span><span class="brand-sub">Roasting Co.</span></span>
+          </a>
+          <p style="margin-top: var(--space-4);">Small-batch specialty coffee roasted in Kuala Lumpur since 2014. Sourced with respect, roasted with obsession, shipped within 48 hours.</p>
+        </div>
+        <nav aria-label="Shop links">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="shop.html">All coffee</a></li>
+            <li><a href="shop.html">Single origins</a></li>
+            <li><a href="shop.html">Blends</a></li>
+            <li><a href="subscriptions.html">Subscriptions</a></li>
+          </ul>
+        </nav>
+        <nav aria-label="Company links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">Our story</a></li>
+            <li><a href="visit.html">Cafes &amp; hours</a></li>
+            <li><a href="contact.html">Contact us</a></li>
+            <li><a href="contact.html">Wholesale</a></li>
+          </ul>
+        </nav>
+        <div>
+          <h4>Get the Roast Sheet</h4>
+          <p style="color: var(--color-dark-muted); font-size: 0.95rem;">Roast-day updates and brew recipes, weekly.</p>
+          <form class="newsletter-form" data-newsletter novalidate>
+            <label class="sr-only" for="footer-email">Email address</label>
+            <input class="input" type="email" id="footer-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+            <button class="btn btn-light" type="submit">Join</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span data-year>2026</span> Ember &amp; Oak Roasting Co. Sdn. Bhd. &middot; Jalan Doraisamy 18, 50300 Kuala Lumpur</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="#" aria-label="X (Twitter)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 4 16 16M20 4 4 20"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
